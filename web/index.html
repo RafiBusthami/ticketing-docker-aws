@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Helpdesk Tickets</title>
+<style>body{font-family:sans-serif;max-width:760px;margin:2rem auto}td,th{padding:4px 8px;border-bottom:1px solid #ddd;text-align:left}</style>
+</head>
+<body>
+<h1>Helpdesk Tickets</h1>
+<p>Planned service 2 (ticket-web). Placeholder page that lists tickets from <code>/api/tickets</code>.</p>
+<table id="t"><tr><th>Title</th><th>Category</th><th>Priority</th><th>Status</th></tr></table>
+<script>
+fetch('/api/tickets').then(r => r.json()).then(d => {
+  const t = document.getElementById('t');
+  d.items.forEach(x => { const r = t.insertRow(); [x.title, x.category, x.priority, x.status].forEach(v => r.insertCell().textContent = v); });
+});
+</script>
+</body>
+</html>
