@@ -15,8 +15,8 @@ Environment: **AWS Academy Lab Project account**, region **us-east-1**, budget *
 | Resource | Name / setting | Purpose |
 |---|---|---|
 | VPC / subnet | `LabVPC` / `Public Subnet1` | Network for the instance (internet gateway route) |
-| EC2 (via Cloud9) | `ticketing-dev`, t3.small, Amazon Linux 2023, SSH connection, auto-hibernate 30 min | Build host and runtime for the containers |
-| Security group | Cloud9 SG + inbound TCP 8080 from my IP /32 | Test access to the API ([rules](../infra/security-group-rules.md)) |
+| EC2 (via Cloud9) | `ticketing-dev` (`i-03bda32a1d6131c7a`), t3.small, Amazon Linux 2023, SSH connection, auto-hibernate 30 min | Build host and runtime for the containers |
+| Security group | `sg-07058327339476ad1`: Cloud9 SSH rules + inbound TCP 8080 from my IP /32 | Test access to the API ([rules](../infra/security-group-rules.md)) |
 | ECR repository | `ticketing/ticket-api`, private, scan on push, AES-256, keep 10 images | Stores the Docker image |
 | Docker volume | `ticket-data` | Keeps the SQLite database across container restarts |
 | Docker network | `ticketing-net` | Lets `ticket-web` reach `ticket-api` by name (planned) |
@@ -56,7 +56,11 @@ bash scripts/smoke_test.sh
 | Persistence | `docker restart ticket-api`, then GET | ticket still exists |
 | External access | browser on laptop → `:8080/health` | 200 from my IP; other IPs time out |
 
-## 5. Cost estimate (lab budget)
+## 5. Result
+
+Done on 22 Nov 2026. Every check in section 4 passed. See [evidence](evidence/README.md).
+
+## 6. Cost estimate (lab budget)
 
 | Item | Rate (us-east-1) | Week 12 usage | Cost |
 |---|---|---|---|
@@ -68,12 +72,12 @@ bash scripts/smoke_test.sh
 
 Budget habits: Cloud9 auto-hibernates after 30 minutes; end the lab session when not working; the ECR lifecycle rule keeps only 10 images.
 
-## 6. Rollback / clean-up
+## 7. Rollback / clean-up
 
 - Bad image: `TAG=<previous-sha> bash scripts/run_from_ecr.sh` (every push keeps a commit tag).
 - Remove project resources: `bash scripts/teardown.sh`, then delete the Cloud9 environment `ticketing-dev`.
 
-## 7. Next steps (proposed)
+## 8. Next steps (proposed)
 
 | Week | Plan |
 |---|---|
