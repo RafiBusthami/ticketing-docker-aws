@@ -38,6 +38,6 @@ docker push "${REGISTRY}/${REPO}:latest"
 
 echo "==> Images in ECR:"
 aws ecr describe-images --repository-name "${REPO}" --region "${REGION}" \
-  --query "sort_by(imageDetails,&imagePushedAt)[].{tags:join(',',imageTags),pushed:imagePushedAt,sizeMB:to_string(imageSizeInBytes)}" \
+  --query "sort_by(imageDetails,&imagePushedAt)[].{tags:join(',',imageTags),pushed:imagePushedAt,sizeBytes:imageSizeInBytes}" \
   --output table
 echo "Image URI: ${REGISTRY}/${REPO}:${TAG}"

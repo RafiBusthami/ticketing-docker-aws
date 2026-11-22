@@ -10,6 +10,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Apply the latest Debian security updates (ECR scan found HIGH CVEs in
+# openssl, glibc and zlib of the base image; fixed versions are available)
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies first so this layer is cached between code changes
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
