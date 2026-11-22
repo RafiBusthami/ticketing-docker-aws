@@ -1,0 +1,95 @@
+### Smoke test - 2026-11-22T07:41:17Z
+
+## 1. AWS identity and EC2 instance
+-------------------------------------------------------------------------------------------------------
+|                                          GetCallerIdentity                                          |
++---------+-------------------------------------------------------------------------------------------+
+|  Account|  767397656598                                                                             |
+|  Arn    |  arn:aws:sts::767397656598:assumed-role/voclabs/user5517562=rafibusthami@mail.ugm.ac.id   |
++---------+-------------------------------------------------------------------------------------------+
+Instance ID   : i-03bda32a1d6131c7a
+Instance type : t3.small
+AZ            : us-east-1a
+VPC subnet    : subnet-0fdc0f137b19ab4b7
+Public IPv4   : 54.146.204.119
+Docker        : Docker version 25.0.14, build 0bab007
+
+## 2. Image in Amazon ECR (ticketing/ticket-api)
+-----------------------------------------------------------------------------------------------------------------------------------
+|                                                         DescribeImages                                                          |
++--------------------------------------------------------------------------+------------------------------------+-----------------+
+|                                  digest                                  |              pushed                |      tags       |
++--------------------------------------------------------------------------+------------------------------------+-----------------+
+|  sha256:c1de2be6582d22cfbc07c0bd6e87bd8ba023225fc3d176218d129bf0b379c9e3 |  2026-11-22T07:27:34.106000+00:00  |  fc528cb        |
+|  sha256:66dcc24d77b82defd59fc8e3a3ad8610ab5427ccfb5a495894efdecbfc258b55 |  2026-11-22T07:31:00.321000+00:00  |  564d581,latest |
++--------------------------------------------------------------------------+------------------------------------+-----------------+
+{
+    "scanStatus": "COMPLETE",
+    "findings": {
+        "HIGH": 8,
+        "MEDIUM": 9,
+        "LOW": 1
+    }
+}
+
+## 3. Running container
+NAMES        IMAGE                                                                      STATUS                   PORTS
+ticket-api   767397656598.dkr.ecr.us-east-1.amazonaws.com/ticketing/ticket-api:latest   Up 8 minutes (healthy)   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp
+
+## 4. CRUD over HTTP (http://localhost:8080)
+--- GET /health
+{
+    "database": "sqlite",
+    "host": "26bfb3d2ba17",
+    "service": "ticket-api",
+    "status": "ok",
+    "tickets": 3,
+    "version": "564d581"
+}
+
+--- [CREATE] POST /tickets
+HTTP 201
+{
+    "category": "NETWORK",
+    "createdAt": "2026-11-22T07:41:20Z",
+    "description": "Connection drops every few minutes.",
+    "priority": "HIGH",
+    "requesterEmail": "rafi@mail.ugm.ac.id",
+    "status": "OPEN",
+    "ticketId": "ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc",
+    "title": "Wi-Fi drops in DTETI lab",
+    "updatedAt": "2026-11-22T07:41:20Z"
+}
+
+--- [READ] GET /tickets/ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc
+{"category":"NETWORK","createdAt":"2026-11-22T07:41:20Z","description":"Connection drops every few minutes.","priority":"HIGH","requesterEmail":"rafi@mail.ugm.ac.id","status":"OPEN","ticketId":"ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc","title":"Wi-Fi drops in DTETI lab","updatedAt":"2026-11-22T07:41:20Z"}
+
+HTTP 200
+
+--- [UPDATE] PUT /tickets/ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc
+{"category":"NETWORK","createdAt":"2026-11-22T07:41:20Z","description":"Connection drops every few minutes.","priority":"URGENT","requesterEmail":"rafi@mail.ugm.ac.id","status":"IN_PROGRESS","ticketId":"ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc","title":"Wi-Fi drops in DTETI lab","updatedAt":"2026-11-22T07:41:20Z"}
+
+HTTP 200
+
+--- [LIST] GET /tickets?status=IN_PROGRESS
+{"count":1,"items":[{"category":"NETWORK","createdAt":"2026-11-22T07:41:20Z","description":"Connection drops every few minutes.","priority":"URGENT","requesterEmail":"rafi@mail.ugm.ac.id","status":"IN_PROGRESS","ticketId":"ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc","title":"Wi-Fi drops in DTETI lab","updatedAt":"2026-11-22T07:41:20Z"}]}
+
+HTTP 200
+
+## 5. Persistence: restart the container, the ticket must still exist
+{"category":"NETWORK","createdAt":"2026-11-22T07:41:20Z","description":"Connection drops every few minutes.","priority":"URGENT","requesterEmail":"rafi@mail.ugm.ac.id","status":"IN_PROGRESS","ticketId":"ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc","title":"Wi-Fi drops in DTETI lab","updatedAt":"2026-11-22T07:41:20Z"}
+
+HTTP 200
+
+--- [DELETE] DELETE /tickets/ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc
+HTTP 204
+--- [READ after delete] expect 404
+{"error":"Ticket ffacfdf0-7f0f-4f4b-86b7-9e114f8bcacc not found"}
+
+HTTP 404
+--- [VALIDATION] bad body, expect 400
+{"details":{"category":"must be one of ['ACCOUNT', 'HARDWARE', 'NETWORK', 'OTHER', 'SOFTWARE']","requesterEmail":"must be a valid email address","title":"must be a string of 3-120 characters"},"error":"Validation failed"}
+
+HTTP 400
+
+### Smoke test finished. Output saved to docs/evidence/smoke-test-output.txt
