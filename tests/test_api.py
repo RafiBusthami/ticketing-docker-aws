@@ -1,10 +1,15 @@
 """Unit tests for ticket-api (Flask test client + temporary SQLite file)."""
 
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
 
+# app.py builds a default app at import time; point it at a temp folder,
+# because /data only exists inside the container.
+os.environ["DB_PATH"] = str(Path(tempfile.mkdtemp()) / "import.db")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "app"))
 
 from app import create_app  # noqa: E402
