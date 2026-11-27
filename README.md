@@ -27,7 +27,7 @@ How a request travels: the client calls the EC2 public IP on port 8080, the secu
 
 How I deploy: I clone this repo in Cloud9, build the image, log in to ECR with `aws ecr get-login-password`, push the image, then pull it back from ECR and run it.
 
-The diagram is made from [`docs/architecture.html`](docs/architecture.html) with the script [`docs/diagram/build_diagram.py`](docs/diagram/build_diagram.py).
+I drew the diagram in draw.io with the official AWS icons. The source file is [`docs/architecture.drawio`](docs/architecture.drawio), so you can open it at [app.diagrams.net](https://app.diagrams.net) and edit it.
 
 ## Week 12 status
 
@@ -96,7 +96,8 @@ curl -X POST http://<EC2_PUBLIC_IP>:8080/tickets -H 'Content-Type: application/j
 │   └── teardown.sh          removes the container and the ECR repo
 ├── tests/test_api.py        14 unit tests (pytest)
 └── docs/
-    ├── architecture.png     the diagram (made from architecture.html)
+    ├── architecture.drawio  diagram source (draw.io)
+    ├── architecture.png     the diagram exported from draw.io
     ├── deployment-plan.md   steps, costs and checks
     └── evidence/            12 screenshots and smoke-test-output.txt
 ```
